@@ -1,142 +1,142 @@
 # cyberdog bringup
 
-## 简述
+## Briefly ##
 
-该模块是启动所有其他子模块的启动模块。
+This module is the startup module that launches all other submodules.
 
-## 总启动流程
+## Total startup flow
 
-该模块用于启动所有ROS 2进程，并直接应用于系统服务中。
+This module is used to start all ROS 2 processes and is applied directly to the system services.
 
-## 总启动流程
+## General startup process
 
-完整的启动流程是通过[systemd service](https://git.n.xiaomi.com/mirp/cyberdog_ros2_deb/-/blob/master/src/etc/systemd/system/cyberdog_ros2.service)调用[lc_bringup_launch.py](https://git.n.xiaomi.com/mirp/cyberdog_bringup/-/blob/master/launch/lc_bringup_launch.py)启动其他所有的节点的启动脚本，并且`lc_bringup_launch.py`会调用`params`文件夹里的`launch_nodes.yaml`,`launch_groups.yaml`, `default_param.yaml`和`remappings.yaml`进行启动。在上述四个`YAML`文件中会配置`可以启动的节点`，`分组启动的节点`，`节点内需要使用的参数`和`节点内需要重映射`的内容。
+The complete startup process is performed by [systemd service](https://git.n.xiaomi.com/mirp/cyberdog_ros2_deb/-/blob/master/src/etc/systemd/system/cyberdog_ros2. service) calls [lc_bringup_launch.py](https://git.n.xiaomi.com/mirp/cyberdog_bringup/-/blob/master/launch/lc_bringup_launch.py) to start all other node startup scripts, and `lc_bringup_launch.py` calls `launch_nodes.yaml`, `launch_groups.yaml`, `default_param.yaml`, and `remappings.yaml` in the `params` folder to perform the startup. The four `YAML` files above will be configured with `nodes that can be launched`, `nodes to be launched in groups`, `parameters to be used within the nodes` and `reappings to be remapped` within the nodes.
 
-在`launch_nodes.yaml`中会提供两种节点：`base_nodes`和`other_nodes`，前者是机器人运动和持续工作所必须的节点，如`不存在`或`启动失败`，则会上报错误，终止启动；后者是其他节点，`不存在`或`启动失败`只会上报警告，并继续启动。
+In `launch_nodes.yaml` two types of nodes will be provided: `base_nodes` and `other_nodes`, the former are nodes that are necessary for the robot to move and continue to work, and if they `don't exist` or `failed to start` they will report an error and terminate the startup, and the latter are other nodes, and if they `don't exist` or `failed to start` they will only report a warning and continue the startup.
 
-在`launch_groups.yaml`中可按需配置不同条件下所需要的节点。
+The nodes required for different conditions can be configured as needed in `launch_groups.yaml`.
 
-在`default_param.yaml`中会提供所有节点的外部参数，按照节点的名字进行分组。
+In `default_param.yaml` the external parameters for all nodes are provided, grouped by node name.
 
-在`remappings.yaml`中会提供所有节点所需要的重映射内容，按照节点的名字进行分组。
+The `remappings.yaml` provides the remappings needed for all nodes, grouped by node name.
 
-## 维护方式
+## Maintenance method
 
-基于上述描述，目前版本（210726）如需要添加或修改节点，不需要启动脚本`lc_bringup_launch.py`，只需要维护`launch_nodes.yaml`, `launch_groups.yaml`,`default_param.yaml`和`remappings.yaml`这四个`YAML`文件即可。下面会介绍如何使用这四个文件：
+Based on the above description, the current version (210726) does not need to start the script `lc_bringup_launch.py` to add or modify nodes, but only needs to maintain the `launch_nodes.yaml`, `launch_groups.yaml`, `default_param.yaml` and `remappings.yaml`. remappings.yaml`, `launch_groups.yaml`, `default_param.yaml` and `remappings.yaml`. How to use these four files is described below:
 
-### launch_nodes.yaml文件使用
+### launch_nodes.yaml file use
 
-该文件用于配置需要启动的节点，主要结构如下：
+This file is used to configure the nodes that need to be launched and has the following main structure:
 ```yaml
-launch_nodes:
+launch_nodes.
     debug_param: "lxterminal -e gdb -ex run --args"
 
     # Must launch, if package or executable error, launcher will stop and throw error
-    base_nodes:
+    base_nodes.
 
-        # - example_node_def_name:
-        #       package: "example_pkg"              (string)
-        #       executable: "example_exe"           (string)
-        #       #[optional] output_screen: false    (true/false)
-        #       #[optional] name: 'example_name'    (string)
-        #       #[optional] load_nodes_param: false (true/false)
-        #       #[optional] enable_debug: false     (true/false)
+        # - example_node_def_name.
+        # package: "example_pkg" (string)
+        # executable: "example_exe" (string)
+        # #[optional] output_screen: false (true/false)
+        # #[optional] name: 'example_name' (string)
+        # #[optional] load_nodes_param: false (true/false)
+        # #[optional] enable_debug: false (true/false)
 
     # Try to launch, if package or executable error, launcher will notice but skip that node
-    other_nodes:
+    other_nodes.
 ```
-- `launch_nodes`内包含1个测试参数`debug_param`, 2个启动节点配置类型(`base_nodes`, `other_nodes`)
+- `launch_nodes` contains 1 test parameter `debug_param`, 2 launch node configuration types (`base_nodes`, `other_nodes`)
 
-测试参数：
-- 在节点中配置`enable_debug == true`时，`debug_param`参数将写入ros2 Node中prefix
+Test Parameters:
+- When `enable_debug == true` is configured in the node, the `debug_param` parameter will be written to the ros2 Node in prefix
 
-配置类型：
-- 配置类型分为`base_nodes`与`other_nodes`
-- `base_nodes` 为基础节点，是核心功能节点，当这些节点启动失败时将会报错并`停止`所有其他节点启动
-- `other_nodes`为辅助节点，是其他功能节点，当这些节点启动失败时将会提醒并`跳过`该出错节点继续启动
+Configuration types:
+- Configuration types are `base_nodes` and `other_nodes`.
+- `base_nodes` are the base nodes, which are the core functional nodes, when these nodes fail to start they will report an error and `stop` all other nodes from starting.
+- `other_nodes` are auxiliary nodes, they are other functional nodes, when these nodes fail to start, they will alert and `skip` the error node to continue starting.
 
-在`base_nodes`与`other_nodes`中即可配置需要启动的节点
+In `base_nodes` and `other_nodes`, you can configure the nodes you want to start.
 
-定义节点配置名称(任意名称)：
+Define the node configuration name (any name):
 ```
-# - example_node_def_name:
+# - example_node_def_name.
 ```
-配置节点启动的包名(根据软件包)：
+Configure the name of the package that the node starts (according to the package):
 ```
-#       package: "example_pkg"              (string)
+# package: "example_pkg" (string)
 ```
-配置节点启动的可执行文件名(根据软件包)：
+Name of the executable that the configuration node launches (according to the package):
 ```
-#       executable: "example_exe"           (string)
+# executable: "example_exe" (string)
 ```
-配置节点标准输出位置(可缺省)：
+Configuration node standard output location (can be defaulted):
 ```
-#       #[optional] output_screen: false    (true/false)
+# #[optional] output_screen: false (true/false)
 ```
-配置节点名称(可缺省)：
+Configure the node name (can be defaulted):
 ```
-#       #[optional] name: 'example_name'    (string)
+# #[optional] name: 'example_name' (string)
 ```
-配置是否装载外部参数(从`params/default_param.yaml`载入，可缺省)：
+Configure whether to load external parameters (from `params/default_param.yaml`, can be defaulted):
 ```
-#       #[optional] load_nodes_param: false (true/false)
+# #[optional] load_nodes_param: false (true/false)
 ```
-配置是否装载debug参数(可缺省)
+Configure whether or not to load debug parameters (can be defaulted)
 ```
-#       #[optional] enable_debug: false     (true/false)
+# #[optional] enable_debug: false (true/false)
 ```
 
-### launch_groups.yaml文件使用
+### The launch_groups.yaml file uses the
 
-该文件用于配置启动组，主要结构如下：
-```yaml
-launch_groups:
+This file is used to configure launch groups and has the following main structure:
+``## yaml
+launch_groups.
   target_launch_group: default
-  groups:
-    # example_group_whitlist:
-    #   launch:   #only launch:
-    #     - example_node_def_name1
-    #     - example_node_def_name2
-    # example_group_blacklist:
-    #   except:   #dont launch:
-    #     - example_node_def_name1
-    #     - example_node_def_name2
-    default:
-      except:
+  groups.
+    # example_group_whitlist.
+    # launch: #only launch.
+    # - example_node_def_name1
+    # - example_node_def_name2
+    # example_group_blacklist.
+    # except: #dont launch.
+    # - example_node_def_name1 # - example_node_def_name2
+    # - example_node_def_name2
+    example_node_def_name1 # - example_node_def_name2
+      # - example_node_def_name1 # - example_node_def_name2
         - cyberdog_motion_test_cmd
         - decision_test
 ```
-- `target_launch_group`为当前启动组
-- `groups`中配置启动组
+- `target_launch_group` is the current launch group.
+- Configure the launch group in `groups`.
 
-在`groups`中有两种配置方式，分别为`launch`和`except`，但一个启动组中只能有一种启动方式
-- `launch`:只启动所列出的全部节点
-- `except`:启动除了列出的全部节点
+There are two ways to configure a launch group in `groups`, `launch` and `except`, but there can only be one way to launch in a launch group
+- `launch`: only launch all the nodes listed.
+- `except`: start all nodes except those listed.
 
-### default_param.yaml文件使用
+### The default_param.yaml file uses the
 
-该文件用于参数设置，主要结构如下：
+This file is used for parameterization and has the following structure:
 
 ```yaml
-# 节点名
-example_node_def_name:
-  # 固定的，表明为ROS参数
-  ros__parameters:
-    # 参数名 和 值
+## Node name.
+example_node_def_name.
+  # fixed, indicated as ROS parameters
+  ros__parameters.
+    # Parameter names and values
     value_a: 1
 ```
 
-具体细节可参考[ROS2 YAML For Parameters](https://roboticsbackend.com/ros2-yaml-params/)
+See [ROS2 YAML For Parameters](https://roboticsbackend.com/ros2-yaml-params/) for details.
 
-### remapping.yaml文件使用
-该文件用于重映射，主要结构如下：
-```yaml
-remappings:
-  example_node_def_name:
+### remapping.yaml file usage
+This file is used for remapping and has the following main structure:
+``yaml
+remappings.
+  example_node_def_name.
     - ['/topic_before1','/topic_after1']
     - ['/topic_before2','/topic_after2']
 ```
-其中`example_node_def_name`根据`launch_nodes.yaml`文件中定义的节点名填写
+where `example_node_def_name` is filled in according to the node name defined in the `launch_nodes.yaml` file
 
 
 
