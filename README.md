@@ -1,4 +1,9 @@
 # Xiaomi CyberDog ROS 2
+# https://github.com/MiRoboticsLab/cyberdog_ws
+# https://github.com/MiRoboticsLab/cyberdog_simulator
+# https://miroboticslab.github.io/blogs/#/cn/cyberdog_gazebo_cn
+# https://miroboticslab.github.io/blogs/#/en/
+
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-orange)](https://choosealicense.com/licenses/apache-2.0/)
 
