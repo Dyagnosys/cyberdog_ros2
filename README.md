@@ -119,3 +119,43 @@ $ sudo systemctl restart cyberdog_ros2.service
 ## Contribute to CyberDog!
 
 Go through the page [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to contribute to CyberDog!
+
+
+# Software Architecture Overview
+
+## Central Component: DDS
+
+DDS (Data Distribution Service) is at the center of the architecture, acting as the main communication hub for the system.
+
+## Peripheral Components
+
+### AndroidAPP
+This seems to be the entry point or the main interface for the system, interacting with various services and bridges.
+- **ROS2_Bluetooth_Bridge**: Connects via Bluetooth.
+- **ROS2_Live_Stream**: Connects via WiFi and RTSP.
+- **ROS2_Camera**: Connects via WiFi and gRPC.
+- **ROS2_GRPC_Bridge**: Connects via WiFi and gRPC.
+
+## ROS2 Services and Nodes
+
+- **ROS2_Camera** and **ROS2_Live_Stream** connect to other ROS2 nodes and services.
+- Nodes like **ROS2_Vision**, **ROS2_LEDServer**, **ROS2_ObstacleDetection**, **ROS2_BatteryManager**, **ROS2_VoiceCMD**, **ROS2_RemoteCMD**, **ROS2_DecisionMaker**, **ROS2_Localization**, **ROS2_Mapping**, **ROS2_Navigation**, **ROS2_Tracking**, **ROS2_LightSensor**, **ROS2_AudioAssitant**, **ROS2_TouchDetection**, **ROS2_Realsense**, **ROS2_BodyStateDetection** are connected to the DDS.
+
+## MCU Drivers
+
+- **MCU_Driver_LED**, **MCU_Driver_Ultrasonic**, **MCU_Driver_TOF**, **MCU_Driver_Mag_AK**, **MCU_Driver_Gyro&Acc_LSM**, **MCU_Driver_OpticalFlow**, **MCU_Driver_LightSensor** interact with various ROS2 nodes through CAN communication.
+
+## Additional Controllers and Managers
+
+- **MIT_Ctrl**: Connected via Ethernet and LCM to the **ROS2_DecisionMaker**.
+- **Manager**: Connected via Ethernet and LCM to the **ROS2_BatteryManager**.
+
+## Key Points
+
+- **DDS** is the central messaging middleware, facilitating communication between all the other components.
+- **AndroidAPP** serves as the main user interface, interacting with the system through various communication bridges.
+- **ROS2 nodes and services** manage specific functionalities like vision, obstacle detection, voice commands, localization, and mapping.
+- **MCU Drivers** represent lower-level hardware interfaces connected to the system via the CAN protocol.
+- **Ethernet and LCM** are used for higher-level communication between controllers and managers.
+
+This architecture is likely for a complex robotic or automated system, integrating multiple sensors, drivers, and control units, coordinated through a central DDS middleware.
