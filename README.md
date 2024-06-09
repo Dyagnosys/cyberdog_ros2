@@ -4,6 +4,7 @@
 # https://miroboticslab.github.io/blogs/#/cn/cyberdog_gazebo_cn
 # https://miroboticslab.github.io/blogs/#/en/
 
+# https://carlosedp.medium.com/upgrading-your-nvidia-jetson-xavier-nx-to-latest-ubuntu-focal-fossa-20-04-5e92ccc5a66
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-orange)](https://choosealicense.com/licenses/apache-2.0/)
 
